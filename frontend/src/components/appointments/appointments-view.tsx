@@ -1,0 +1,300 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { Plus } from "lucide-react";
+import type { DateClickInfo, EventDropInfo } from "@fullcalendar/react";
+
+import { PermissionGate } from "@/components/auth/permission-gate";
+import { AppointmentCalendar } from "@/components/appointments/appointment-calendar";
+import { AppointmentDetailModal } from "@/components/appointments/appointment-detail-modal";
+import { AppointmentFormModal } from "@/components/appointments/appointment-form-modal";
+import { BookingWizardModal } from "@/components/appointments/booking-wizard-modal";
+import { CancelAppointmentDialog } from "@/components/appointments/cancel-appointment-dialog";
+import { RescheduleModal } from "@/components/appointments/reschedule-modal";
+import { StatusLegend } from "@/components/appointments/status-legend";
+import { ErrorDisplay } from "@/components/feedback/error-display";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAppointmentCalendar, useAppointmentMutations } from "@/hooks/use-appointments";
+import { useCustomers } from "@/hooks/use-customers";
+import { usePermissions } from "@/hooks/use-permissions";
+import { useServices } from "@/hooks/use-services";
+import { useStaff } from "@/hooks/use-staff";
+import { toApiTimeValue, toIsoDate } from "@/lib/appointments/calendar-utils";
+import { canReschedule } from "@/lib/appointments/status-colors";
+import type { BookingDraft } from "@/lib/schemas/booking-wizard";
+import { toAppointmentUpdatePayload, toReschedulePayload } from "@/lib/schemas/appointment";
+import { toast } from "@/lib/toast";
+import type { Appointment } from "@/types/api";
+import type { AppointmentCalendarParams } from "@/types/appointments";
+
+function getInitialRange(): AppointmentCalendarParams {
+  const today = new Date();
+  const start = new Date(today);
+  start.setDate(today.getDate() - today.getDay());
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+  return {
+    start_date: toIsoDate(start),
+    end_date: toIsoDate(end),
+  };
+}
+
+export function AppointmentsView() {
+  const { canAny } = usePermissions();
+  const canWrite = canAny(["appointments:write", "appointments:write_own"]);
+  const canFilterStaff = canAny(["appointments:read"]);
+
+  const [calendarParams, setCalendarParams] = useState<AppointmentCalendarParams>(getInitialRange);
+  const [staffFilter, setStaffFilter] = useState<string>("");
+
+  const queryParams = useMemo(
+    () => ({
+      ...calendarParams,
+      staff_id: staffFilter || undefined,
+    }),
+    [calendarParams, staffFilter],
+  );
+
+  const calendarQuery = useAppointmentCalendar(queryParams);
+  const customersQuery = useCustomers({ page: 1, limit: 100, sort_by: "name", sort_order: "asc" });
+  const staffQuery = useStaff({ page: 1, limit: 100, sort_by: "name", sort_order: "asc", status: "ACTIVE" });
+  const servicesQuery = useServices({
+    page: 1,
+    limit: 100,
+    sort_by: "name",
+    sort_order: "asc",
+    is_active: true,
+  });
+
+  const {
+    createAppointment,
+    updateAppointment,
+    cancelAppointment,
+    rescheduleAppointment,
+    isCreating,
+    isUpdating,
+    isCancelling,
+    isRescheduling,
+  } = useAppointmentMutations();
+
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [bookingDefaults, setBookingDefaults] = useState<Partial<BookingDraft>>();
+  const [editOpen, setEditOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | undefined>();
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+
+  const customers = customersQuery.data?.items ?? [];
+  const staff = staffQuery.data?.items ?? [];
+  const services = servicesQuery.data?.items ?? [];
+
+  const openBooking = (defaults?: Partial<BookingDraft>) => {
+    setBookingDefaults(defaults);
+    setBookingOpen(true);
+  };
+
+  const openEdit = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setDetailOpen(false);
+    setEditOpen(true);
+  };
+
+  const openDetail = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setDetailOpen(true);
+  };
+
+  const handleDateClick = (info: DateClickInfo) => {
+    if (!canWrite) {
+      return;
+    }
+
+    const date = info.dateStr.slice(0, 10);
+    const time = info.dateStr.includes("T") ? info.dateStr.slice(11, 16) : undefined;
+
+    openBooking({
+      appointment_date: date,
+      start_time: time,
+      staff_id: staffFilter || undefined,
+    });
+  };
+
+  const handleEventDrop = async (appointment: Appointment, info: EventDropInfo) => {
+    if (!canWrite || !canReschedule(appointment.status)) {
+      info.revert();
+      return;
+    }
+
+    const start = info.event.start;
+    if (!start) {
+      info.revert();
+      return;
+    }
+
+    try {
+      await rescheduleAppointment({
+        id: appointment.id,
+        payload: {
+          appointment_date: toIsoDate(start),
+          start_time: toApiTimeValue(
+            `${String(start.getHours()).padStart(2, "0")}:${String(start.getMinutes()).padStart(2, "0")}`,
+          ),
+        },
+      });
+      toast.success("Appointment rescheduled");
+    } catch (error) {
+      toast.fromError(error, "Unable to reschedule appointment");
+      throw error;
+    }
+  };
+
+  if (calendarQuery.isError) {
+    return (
+      <ErrorDisplay
+        error={calendarQuery.error}
+        title="Unable to load appointments"
+        onRetry={() => calendarQuery.refetch()}
+      />
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Appointments</h1>
+          <p className="text-sm text-muted-foreground">
+            Day, week, and month views with status color coding.
+          </p>
+        </div>
+        <PermissionGate permissions={["appointments:write", "appointments:write_own"]} any>
+          <Button type="button" onClick={() => openBooking({ staff_id: staffFilter || undefined })}>
+            <Plus className="h-4 w-4" />
+            Book appointment
+          </Button>
+        </PermissionGate>
+      </div>
+
+      <Card>
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <CardTitle>Calendar</CardTitle>
+            {canFilterStaff ? (
+              <select
+                value={staffFilter}
+                onChange={(event) => setStaffFilter(event.target.value)}
+                className="h-10 rounded-md border border-input bg-background px-3 text-sm lg:min-w-56"
+              >
+                <option value="">All staff</option>
+                {staff.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+            ) : null}
+          </div>
+          <StatusLegend />
+        </CardHeader>
+        <CardContent>
+          <AppointmentCalendar
+            appointments={calendarQuery.data ?? []}
+            loading={calendarQuery.isFetching}
+            editable={canWrite}
+            onRangeChange={(range) => setCalendarParams((current) => ({ ...current, ...range }))}
+            onDateClick={handleDateClick}
+            onEventClick={openDetail}
+            onEventDrop={canWrite ? handleEventDrop : undefined}
+          />
+        </CardContent>
+      </Card>
+
+      <BookingWizardModal
+        open={bookingOpen}
+        customers={customers}
+        staff={staff}
+        services={services}
+        defaults={bookingDefaults}
+        loading={isCreating}
+        onOpenChange={setBookingOpen}
+        onSubmit={async (payload) => {
+          await createAppointment(payload);
+          toast.success("Appointment booked");
+        }}
+      />
+
+      <AppointmentFormModal
+        open={editOpen}
+        mode="edit"
+        appointment={selectedAppointment}
+        customers={customers}
+        staff={staff}
+        services={services}
+        loading={isUpdating}
+        onOpenChange={setEditOpen}
+        onSubmit={async (values) => {
+          if (selectedAppointment) {
+            await updateAppointment({
+              id: selectedAppointment.id,
+              payload: toAppointmentUpdatePayload(values),
+            });
+            toast.success("Appointment updated");
+          }
+        }}
+      />
+
+      <AppointmentDetailModal
+        open={detailOpen}
+        appointment={selectedAppointment}
+        loading={isUpdating || isCancelling || isRescheduling}
+        onOpenChange={setDetailOpen}
+        onEdit={openEdit}
+        onReschedule={(appointment) => {
+          setSelectedAppointment(appointment);
+          setDetailOpen(false);
+          setRescheduleOpen(true);
+        }}
+        onCancel={(appointment) => {
+          setSelectedAppointment(appointment);
+          setDetailOpen(false);
+          setCancelOpen(true);
+        }}
+      />
+
+      <RescheduleModal
+        open={rescheduleOpen}
+        appointment={selectedAppointment}
+        staff={staff}
+        loading={isRescheduling}
+        onOpenChange={setRescheduleOpen}
+        onSubmit={async (values) => {
+          if (!selectedAppointment) {
+            return;
+          }
+          await rescheduleAppointment({
+            id: selectedAppointment.id,
+            payload: toReschedulePayload(values),
+          });
+          toast.success("Appointment rescheduled");
+        }}
+      />
+
+      <CancelAppointmentDialog
+        open={cancelOpen}
+        customerName={selectedAppointment?.customer_name}
+        loading={isCancelling}
+        onOpenChange={setCancelOpen}
+        onConfirm={async () => {
+          if (!selectedAppointment) {
+            return;
+          }
+          await cancelAppointment(selectedAppointment.id);
+          toast.success("Appointment cancelled");
+        }}
+      />
+    </div>
+  );
+}
