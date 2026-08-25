@@ -1,0 +1,45 @@
+# Free UAT backend. Apply from https://dashboard.render.com/blueprints
+# after creating a Neon Postgres database. See DEPLOY.md.
+
+services:
+  - type: web
+    name: salon-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: sh docker-entrypoint.sh
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.11"
+      - key: APP_ENV
+        value: staging
+      - key: DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: "*"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
+      - key: RUN_SEED
+        value: "true"
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "5"
+      - key: DB_CONNECT_TIMEOUT_SECONDS
+        value: "30"
+      - key: DB_CONNECT_ATTEMPTS
+        value: "40"
+      - key: SEED_ADMIN_EMAIL
+        value: admin@example.com
+      - key: SEED_ADMIN_PASSWORD
+        value: AdminPass123!
+      - key: SEED_STAFF_PASSWORD
+        value: StaffPass123!

@@ -54,6 +54,10 @@ docker compose up --build
 
 The API container runs `alembic upgrade head` on startup.
 
+## Free UAT (client review)
+
+Neon (Postgres) + Render (API) + Vercel (web). Step-by-step: [DEPLOY.md](./DEPLOY.md).
+
 ## Pre-commit
 
 ```bash
