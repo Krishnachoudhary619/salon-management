@@ -24,11 +24,11 @@ export function getMonthRange(months: number) {
 export function formatCurrency(value: string | number) {
   const amount = typeof value === "string" ? Number.parseFloat(value) : value;
   if (Number.isNaN(amount)) {
-    return "₹0";
+    return "SAR 0";
   }
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat("en-SA", {
     style: "currency",
-    currency: "INR",
+    currency: "SAR",
     maximumFractionDigits: 0,
   }).format(amount);
 }

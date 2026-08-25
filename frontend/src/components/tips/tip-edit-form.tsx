@@ -61,7 +61,7 @@ export function TipEditForm({ tip, loading = false, onSubmit, onCancel }: TipEdi
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="edit_tip_amount">Amount (INR)</Label>
+        <Label htmlFor="edit_tip_amount">Amount (SAR)</Label>
         <Input
           id="edit_tip_amount"
           type="number"

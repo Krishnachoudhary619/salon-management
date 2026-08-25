@@ -79,7 +79,7 @@ export function TipForm({ appointments, loading = false, onSubmit, onCancel }: T
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="tip_amount">Amount (INR)</Label>
+        <Label htmlFor="tip_amount">Amount (SAR)</Label>
         <Input id="tip_amount" type="number" min={0.01} step="0.01" disabled={busy} {...register("amount")} />
         {errors.amount ? <p className="text-sm text-destructive">{errors.amount.message}</p> : null}
       </div>

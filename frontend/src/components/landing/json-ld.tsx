@@ -16,7 +16,7 @@ export function LandingJsonLd() {
       addressCountry: "AE",
     },
     openingHours: "Mo-Su 10:00-22:00",
-    priceRange: "AED 220–AED 1,800",
+    priceRange: "SAR 25–SAR 200",
     description: brand.tagline,
     hasOfferCatalog: {
       "@type": "OfferCatalog",

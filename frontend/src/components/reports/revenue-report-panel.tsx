@@ -75,7 +75,9 @@ export function RevenueReportPanel({ rows, period, loading }: RevenueReportPanel
                   axisLine={false}
                   width={56}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  tickFormatter={(value: number) => `₹${Math.round(value / 1000)}k`}
+                  tickFormatter={(value: number) =>
+                    value >= 1000 ? `SAR ${Math.round(value / 1000)}k` : `SAR ${Math.round(value)}`
+                  }
                 />
                 <Tooltip
                   formatter={(value) => [formatCurrency(Number(value ?? 0)), "Revenue"]}
@@ -109,7 +111,9 @@ export function RevenueReportPanel({ rows, period, loading }: RevenueReportPanel
                   axisLine={false}
                   width={56}
                   tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-                  tickFormatter={(value: number) => `₹${Math.round(value / 1000)}k`}
+                  tickFormatter={(value: number) =>
+                    value >= 1000 ? `SAR ${Math.round(value / 1000)}k` : `SAR ${Math.round(value)}`
+                  }
                 />
                 <Tooltip
                   formatter={(value) => [formatCurrency(Number(value ?? 0)), "Revenue"]}

@@ -110,7 +110,7 @@ export function ServiceForm({ mode, service, loading, onSubmit, onCancel }: Serv
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="price">Price (INR)</Label>
+          <Label htmlFor="price">Price (SAR)</Label>
           <Input id="price" type="number" min={0.01} step="0.01" disabled={busy} {...register("price")} />
           {errors.price ? <p className="text-sm text-destructive">{errors.price.message}</p> : null}
         </div>

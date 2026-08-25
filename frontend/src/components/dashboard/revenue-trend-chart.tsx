@@ -54,7 +54,9 @@ export function RevenueTrendChart({ items, loading }: RevenueTrendChartProps) {
               axisLine={false}
               width={56}
               tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
-              tickFormatter={(value: number) => `₹${Math.round(value / 1000)}k`}
+              tickFormatter={(value: number) =>
+                value >= 1000 ? `SAR ${Math.round(value / 1000)}k` : `SAR ${Math.round(value)}`
+              }
             />
             <Tooltip
               cursor={{ stroke: "#0f766e", strokeWidth: 1, strokeDasharray: "4 4" }}

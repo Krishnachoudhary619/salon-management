@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { getErrorMessage, getFieldErrors } from "@/lib/api/errors";
+import { formatCurrency } from "@/lib/format";
 import {
   appointmentEditSchema,
   appointmentFormSchema,
@@ -69,7 +70,7 @@ function ServiceChecklist({
                 <span className="font-medium">{service.name}</span>
                 <span className="text-muted-foreground">
                   {" "}
-                  · {service.duration_minutes} min · ₹{service.price}
+                  · {service.duration_minutes} min · {formatCurrency(service.price)}
                 </span>
               </span>
             </label>
