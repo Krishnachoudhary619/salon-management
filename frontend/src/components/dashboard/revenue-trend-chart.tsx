@@ -1,9 +1,9 @@
 "use client";
 
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -27,15 +27,21 @@ export function RevenueTrendChart({ items, loading }: RevenueTrendChartProps) {
 
   return (
     <ChartCard
-      title="Revenue Trend"
-      description="Daily revenue over the last 30 days"
+      title="Revenue"
+      description="Daily takings over the last 30 days"
       loading={loading}
       empty={!loading && data.length === 0}
     >
       <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
+          <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <defs>
+              <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#0f766e" stopOpacity={0.22} />
+                <stop offset="100%" stopColor="#0f766e" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="4 6" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="label"
               tickLine={false}
@@ -51,23 +57,26 @@ export function RevenueTrendChart({ items, loading }: RevenueTrendChartProps) {
               tickFormatter={(value: number) => `₹${Math.round(value / 1000)}k`}
             />
             <Tooltip
+              cursor={{ stroke: "#0f766e", strokeWidth: 1, strokeDasharray: "4 4" }}
               formatter={(value) => [formatCurrency(Number(value ?? 0)), "Revenue"]}
               labelClassName="text-foreground"
               contentStyle={{
                 backgroundColor: "hsl(var(--popover))",
                 borderColor: "hsl(var(--border))",
-                borderRadius: "0.5rem",
+                borderRadius: "0.75rem",
+                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
               }}
             />
-            <Line
+            <Area
               type="monotone"
               dataKey="revenue"
-              stroke="hsl(var(--primary))"
-              strokeWidth={2}
+              stroke="#0f766e"
+              strokeWidth={2.5}
+              fill="url(#revenueFill)"
               dot={false}
-              activeDot={{ r: 4 }}
+              activeDot={{ r: 5, strokeWidth: 2, stroke: "#fff" }}
             />
-          </LineChart>
+          </AreaChart>
         </ResponsiveContainer>
       </div>
     </ChartCard>

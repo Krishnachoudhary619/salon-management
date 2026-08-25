@@ -4,7 +4,6 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
-  Legend,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -30,15 +29,28 @@ export function AppointmentTrendChart({ items, loading }: AppointmentTrendChartP
 
   return (
     <ChartCard
-      title="Appointment Trend"
-      description="Daily appointment volume over the last 30 days"
+      title="Appointments"
+      description="Daily volume over the last 30 days"
       loading={loading}
       empty={!loading && data.length === 0}
+      action={
+        <div className="hidden items-center gap-3 text-[11px] text-muted-foreground sm:flex">
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-slate-800" /> Total
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-emerald-500" /> Done
+          </span>
+          <span className="inline-flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full bg-rose-400" /> Cancelled
+          </span>
+        </div>
+      }
     >
       <div className="h-[280px] w-full">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-border" vertical={false} />
+          <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} barGap={2}>
+            <CartesianGrid strokeDasharray="4 6" stroke="hsl(var(--border))" vertical={false} />
             <XAxis
               dataKey="label"
               tickLine={false}
@@ -54,16 +66,17 @@ export function AppointmentTrendChart({ items, loading }: AppointmentTrendChartP
               tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
             />
             <Tooltip
+              cursor={{ fill: "hsl(var(--muted))", opacity: 0.45 }}
               contentStyle={{
                 backgroundColor: "hsl(var(--popover))",
                 borderColor: "hsl(var(--border))",
-                borderRadius: "0.5rem",
+                borderRadius: "0.75rem",
+                boxShadow: "0 8px 24px rgba(15, 23, 42, 0.08)",
               }}
             />
-            <Legend />
-            <Bar dataKey="total" name="Total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="completed" name="Completed" fill="#10b981" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="cancelled" name="Cancelled" fill="#ef4444" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="total" name="Total" fill="#1e293b" radius={[6, 6, 0, 0]} maxBarSize={18} />
+            <Bar dataKey="completed" name="Completed" fill="#10b981" radius={[6, 6, 0, 0]} maxBarSize={18} />
+            <Bar dataKey="cancelled" name="Cancelled" fill="#fb7185" radius={[6, 6, 0, 0]} maxBarSize={18} />
           </BarChart>
         </ResponsiveContainer>
       </div>

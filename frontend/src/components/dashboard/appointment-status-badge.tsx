@@ -16,5 +16,9 @@ const STATUS_VARIANT: Record<
 };
 
 export function AppointmentStatusBadge({ status }: { status: AppointmentStatus }) {
-  return <Badge variant={STATUS_VARIANT[status]}>{formatStatusLabel(status)}</Badge>;
+  return (
+    <Badge variant={STATUS_VARIANT[status]} className="shrink-0 font-medium">
+      {formatStatusLabel(status)}
+    </Badge>
+  );
 }

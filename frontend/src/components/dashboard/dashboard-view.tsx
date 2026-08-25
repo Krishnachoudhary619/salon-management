@@ -1,7 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, IndianRupee, TrendingUp, Users } from "lucide-react";
+import { CalendarDays, IndianRupee, Sparkles, TrendingUp, Users } from "lucide-react";
+
+import { formatDashboardDate, getFirstName, getGreeting } from "@/components/dashboard/dashboard-utils";
+import { useAuth } from "@/hooks/use-auth";
 
 import { CompleteAppointmentDialog } from "@/components/appointments/complete-appointment-dialog";
 import { ConfirmAppointmentDialog } from "@/components/appointments/confirm-appointment-dialog";
@@ -38,6 +41,7 @@ export function DashboardView() {
   const staffQuery = useStaff({ page: 1, limit: 100, sort_by: "name", sort_order: "asc", status: "ACTIVE" });
   const { changeAppointmentStatus, isChangingStatus } = useAppointmentMutations();
   const { createPayment, isCreating: isRecordingPayment } = usePaymentMutations();
+  const { user } = useAuth();
   const { canAny } = usePermissions();
   const canRecordPayment = canAny(["payments:write"]);
   const [confirming, setConfirming] = useState<Appointment | undefined>();
@@ -58,40 +62,53 @@ export function DashboardView() {
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          {overview?.as_of
-            ? `Overview as of ${formatDateTimeLabel(overview.as_of)}`
-            : "Salon performance overview"}
-        </p>
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">{formatDashboardDate()}</p>
+          <h1 className="mt-1 text-3xl font-semibold tracking-tight">
+            {getGreeting()}, {getFirstName(user?.name)}
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {overview?.as_of
+              ? `Updated ${formatDateTimeLabel(overview.as_of)}`
+              : "Today’s book and takings"}
+          </p>
+        </div>
+        <div className="inline-flex items-center gap-2 self-start rounded-full border border-border/70 bg-card px-3 py-1.5 text-sm text-muted-foreground">
+          <Sparkles className="h-4 w-4 text-amber-500" />
+          Avg ticket {formatCurrency(overview?.average_ticket_size ?? "0")}
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Today's Revenue"
+          title="Today’s revenue"
           value={formatCurrency(overview?.revenue_today ?? "0")}
           icon={IndianRupee}
+          tone="emerald"
           loading={overviewLoading}
         />
         <StatCard
-          title="Monthly Revenue"
+          title="This month"
           value={formatCurrency(overview?.revenue_this_month ?? "0")}
           icon={TrendingUp}
+          tone="blue"
           loading={overviewLoading}
         />
         <StatCard
-          title="Today's Appointments"
+          title="Appointments today"
           value={String(overview?.appointments_today ?? 0)}
           icon={CalendarDays}
+          tone="amber"
           loading={overviewLoading}
         />
         <StatCard
-          title="Customers Served"
+          title="Customers served"
           value={String(overview?.customers_served ?? 0)}
           description="Completed visits today"
           icon={Users}
+          tone="violet"
           loading={overviewLoading}
         />
       </div>
