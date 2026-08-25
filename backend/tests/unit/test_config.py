@@ -27,6 +27,37 @@ def test_database_url_encodes_password() -> None:
     assert "p%40ss%3Aw%2Ford" in settings.database_url
 
 
+def test_database_url_env_overrides_split_fields() -> None:
+    settings = Settings(
+        DATABASE_URL=(
+            "postgresql://neon:secret@ep-demo-pooler.ap-southeast-1.aws.neon.tech/"
+            "salon?sslmode=require&channel_binding=require"
+        ),
+        DB_HOST="localhost",
+        DB_NAME="ignored",
+    )
+    assert settings.database_url.startswith(
+        "postgresql+asyncpg://neon:secret@ep-demo-pooler.ap-southeast-1.aws.neon.tech/salon"
+    )
+    assert "sslmode" not in settings.database_url
+    assert "channel_binding" not in settings.database_url
+    assert settings.database_ssl is True
+    assert settings.database_uses_pooler is True
+    assert settings.asyncpg_connect_args["ssl"] is True
+    assert settings.asyncpg_connect_args["statement_cache_size"] == 0
+
+
+def test_database_url_accepts_postgres_scheme() -> None:
+    settings = Settings(DATABASE_URL="postgres://salon:salon@db:5432/salon")
+    assert settings.database_url == "postgresql+asyncpg://salon:salon@db:5432/salon"
+
+
+def test_database_ssl_can_be_disabled() -> None:
+    settings = Settings(DATABASE_URL="postgresql://salon:salon@db:5432/salon", DB_SSL=False)
+    assert settings.database_ssl is False
+    assert "ssl" not in settings.asyncpg_connect_args
+
+
 def test_cors_origin_parsing() -> None:
     settings = Settings(CORS_ORIGINS="http://localhost:3000, https://salon.example")
     assert settings.cors_origin_list == ["http://localhost:3000", "https://salon.example"]

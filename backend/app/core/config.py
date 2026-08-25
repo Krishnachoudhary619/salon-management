@@ -1,9 +1,30 @@
 from functools import lru_cache
-from typing import Literal, Self
-from urllib.parse import quote_plus
+from typing import Any, Literal, Self
+from urllib.parse import parse_qsl, quote_plus, urlencode, urlparse, urlunparse
 
 from pydantic import Field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_ASYNCPG_UNSUPPORTED_QUERY_KEYS = frozenset(
+    {"sslmode", "channel_binding", "sslrootcert", "sslcert", "sslkey"}
+)
+
+
+def to_asyncpg_database_url(raw: str) -> str:
+    """Normalize a hosted or local Postgres URL for SQLAlchemy + asyncpg."""
+    url = raw.strip()
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://") :]
+    if url.startswith("postgresql://") and not url.startswith("postgresql+"):
+        url = "postgresql+asyncpg://" + url[len("postgresql://") :]
+
+    parsed = urlparse(url)
+    query = [
+        (key, value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+        if key.lower() not in _ASYNCPG_UNSUPPORTED_QUERY_KEYS
+    ]
+    return urlunparse(parsed._replace(query=urlencode(query)))
 
 
 class Settings(BaseSettings):
@@ -21,11 +42,14 @@ class Settings(BaseSettings):
     DEBUG: bool = False
     API_V1_PREFIX: str = "/api/v1"
 
+    # Prefer DATABASE_URL on hosted Postgres (Neon, Render, Supabase).
+    DATABASE_URL: str | None = None
     DB_HOST: str = "localhost"
     DB_PORT: int = 5432
     DB_NAME: str = "salon"
     DB_USER: str = "salon"
     DB_PASSWORD: str = "salon"
+    DB_SSL: bool | None = None
     DB_ECHO: bool = False
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
@@ -86,12 +110,38 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        if self.DATABASE_URL:
+            return to_asyncpg_database_url(self.DATABASE_URL)
         user = quote_plus(self.DB_USER)
         password = quote_plus(self.DB_PASSWORD)
         return (
             f"postgresql+asyncpg://{user}:{password}"
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
+
+    @property
+    def database_ssl(self) -> bool:
+        if self.DB_SSL is not None:
+            return self.DB_SSL
+        return bool(self.DATABASE_URL)
+
+    @property
+    def database_uses_pooler(self) -> bool:
+        raw = self.DATABASE_URL or ""
+        host = (urlparse(raw).hostname or "").lower()
+        return "-pooler." in host or ".pooler." in host
+
+    @property
+    def asyncpg_connect_args(self) -> dict[str, Any]:
+        args: dict[str, Any] = {
+            "timeout": self.DB_CONNECT_TIMEOUT_SECONDS,
+            "command_timeout": self.DB_COMMAND_TIMEOUT_SECONDS,
+        }
+        if self.database_ssl:
+            args["ssl"] = True
+        if self.database_uses_pooler:
+            args["statement_cache_size"] = 0
+        return args
 
     @property
     def cors_origin_list(self) -> list[str]:

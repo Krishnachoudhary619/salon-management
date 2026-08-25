@@ -16,10 +16,7 @@ engine = create_async_engine(
     pool_size=settings.DB_POOL_SIZE,
     max_overflow=settings.DB_MAX_OVERFLOW,
     pool_timeout=settings.DB_POOL_TIMEOUT_SECONDS,
-    connect_args={
-        "timeout": settings.DB_CONNECT_TIMEOUT_SECONDS,
-        "command_timeout": settings.DB_COMMAND_TIMEOUT_SECONDS,
-    },
+    connect_args=settings.asyncpg_connect_args,
 )
 
 async_session_maker = async_sessionmaker(
