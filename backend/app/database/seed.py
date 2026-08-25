@@ -50,53 +50,95 @@ class SampleStaffSpec:
 
 SAMPLE_SERVICES: tuple[SampleServiceSpec, ...] = (
     SampleServiceSpec(
-        name="Haircut (Men)",
-        description="Classic men's haircut with wash and finish",
+        name="Hair cutting",
+        description="Precision haircut with wash and finish",
         category="Hair",
         duration_minutes=30,
-        price=Decimal("400.00"),
+        price=Decimal("25.00"),
     ),
     SampleServiceSpec(
-        name="Haircut (Women)",
-        description="Women's haircut with blow-dry",
-        category="Hair",
-        duration_minutes=45,
-        price=Decimal("600.00"),
-    ),
-    SampleServiceSpec(
-        name="Beard Trim",
-        description="Beard shape and trim",
+        name="Beard setting with steam",
+        description="Beard shape and set with a hot steam finish",
         category="Beard",
-        duration_minutes=20,
-        price=Decimal("250.00"),
+        duration_minutes=30,
+        price=Decimal("25.00"),
     ),
     SampleServiceSpec(
-        name="Hair Color",
-        description="Full-head color with toner",
-        category="Color",
-        duration_minutes=90,
-        price=Decimal("1800.00"),
-    ),
-    SampleServiceSpec(
-        name="Facial",
-        description="Cleansing facial for all skin types",
+        name="Face scrub",
+        description="Exfoliating face scrub for a clean, fresh finish",
         category="Facial",
-        duration_minutes=60,
-        price=Decimal("1200.00"),
+        duration_minutes=30,
+        price=Decimal("30.00"),
     ),
     SampleServiceSpec(
-        name="Hair Spa",
+        name="Keratin",
+        description="Smoothing keratin treatment for frizz control and shine",
+        category="Hair",
+        duration_minutes=90,
+        price=Decimal("120.00"),
+    ),
+    SampleServiceSpec(
+        name="Hair spa",
         description="Nourishing hair spa treatment",
         category="Spa",
         duration_minutes=45,
-        price=Decimal("900.00"),
+        price=Decimal("60.00"),
     ),
     SampleServiceSpec(
-        name="Head Massage",
-        description="Relaxing scalp and head massage",
+        name="Dye",
+        description="Hair dye application and rinse",
+        category="Color",
+        duration_minutes=45,
+        price=Decimal("35.00"),
+    ),
+    SampleServiceSpec(
+        name="Beard colouring",
+        description="Beard colour blend and finish",
+        category="Beard",
+        duration_minutes=25,
+        price=Decimal("25.00"),
+    ),
+    SampleServiceSpec(
+        name="Normal Facial",
+        description="Classic cleansing facial for all skin types",
+        category="Facial",
+        duration_minutes=60,
+        price=Decimal("90.00"),
+    ),
+    SampleServiceSpec(
+        name="Hydra facial",
+        description="Hydrating facial with deep cleanse and serum infusion",
+        category="Facial",
+        duration_minutes=75,
+        price=Decimal("150.00"),
+    ),
+    SampleServiceSpec(
+        name="Special facial",
+        description="Premium facial with extended treatment and finish",
+        category="Facial",
+        duration_minutes=90,
+        price=Decimal("200.00"),
+    ),
+    SampleServiceSpec(
+        name="Cleanup",
+        description="Skin cleanup with extraction and tone",
+        category="Facial",
+        duration_minutes=45,
+        price=Decimal("60.00"),
+    ),
+    SampleServiceSpec(
+        name="Face wax",
+        description="Face waxing for a clean, smooth finish",
+        category="Facial",
+        duration_minutes=20,
+        price=Decimal("35.00"),
+    ),
+    SampleServiceSpec(
+        name="Oil massage",
+        description="Relaxing oil massage for scalp and shoulders",
         category="Spa",
         duration_minutes=30,
-        price=Decimal("500.00"),
+        price=Decimal("30.00"),
     ),
 )
 
@@ -239,6 +281,12 @@ async def seed_sample_services(session: AsyncSession) -> list[Service]:
             session.add(service)
             await session.flush()
             created += 1
+        else:
+            service.description = spec.description
+            service.category = spec.category
+            service.duration_minutes = spec.duration_minutes
+            service.price = spec.price
+            service.is_active = True
         services.append(service)
     logger.info("seeded_sample_services", created=created, skipped=len(SAMPLE_SERVICES) - created)
     return services
