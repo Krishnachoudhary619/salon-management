@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, time
 from decimal import Decimal
 from uuid import UUID
 
@@ -16,8 +16,10 @@ from app.common.enums import StaffStatus
 from app.core.config import Settings, get_settings
 from app.core.logging import configure_logging, get_logger
 from app.core.security import hash_password
+from app.database import models as _models  # noqa: F401
 from app.database.session import async_session_maker, engine
 from app.services.models import Service
+from app.schedules.models import StaffSchedule
 from app.staff.models import Staff
 from app.users.models import Role, User, UserRole
 
@@ -123,6 +125,17 @@ SAMPLE_STAFF: tuple[SampleStaffSpec, ...] = (
         commission_percentage=Decimal("40.00"),
         joining_date=date(2024, 6, 10),
     ),
+)
+
+# day_of_week: 0 = Monday … 6 = Sunday (matches availability engine)
+DEFAULT_WORKING_DAYS: tuple[tuple[int, time, time], ...] = (
+    (0, time(9, 0), time(18, 0)),
+    (1, time(9, 0), time(18, 0)),
+    (2, time(9, 0), time(18, 0)),
+    (3, time(9, 0), time(18, 0)),
+    (4, time(9, 0), time(18, 0)),
+    (5, time(9, 0), time(18, 0)),
+    (6, time(10, 0), time(16, 0)),
 )
 
 
@@ -281,6 +294,33 @@ async def seed_sample_staff(
     return staff_members
 
 
+async def seed_sample_schedules(session: AsyncSession, staff_members: list[Staff]) -> None:
+    """Ensure default weekly working hours exist for sample staff."""
+    created = 0
+    for staff in staff_members:
+        for day_of_week, start_time, end_time in DEFAULT_WORKING_DAYS:
+            result = await session.execute(
+                select(StaffSchedule).where(
+                    StaffSchedule.staff_id == staff.id,
+                    StaffSchedule.day_of_week == day_of_week,
+                    StaffSchedule.is_deleted.is_(False),
+                )
+            )
+            if result.scalar_one_or_none() is not None:
+                continue
+            session.add(
+                StaffSchedule(
+                    staff_id=staff.id,
+                    day_of_week=day_of_week,
+                    start_time=start_time,
+                    end_time=end_time,
+                )
+            )
+            created += 1
+            await session.flush()
+    logger.info("seeded_sample_schedules", created=created)
+
+
 def _reject_default_passwords_in_production(settings: Settings) -> None:
     if not settings.is_production:
         return
@@ -304,7 +344,8 @@ async def seed_database(session: AsyncSession, settings: Settings | None = None)
         password=active_settings.SEED_ADMIN_PASSWORD,
     )
     await seed_sample_services(session)
-    await seed_sample_staff(session, roles, password=active_settings.SEED_STAFF_PASSWORD)
+    staff_members = await seed_sample_staff(session, roles, password=active_settings.SEED_STAFF_PASSWORD)
+    await seed_sample_schedules(session, staff_members)
     logger.info("database_seed_complete")
 
 
