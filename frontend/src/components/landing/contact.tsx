@@ -20,7 +20,6 @@ export function Contact() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [serviceId, setServiceId] = useState("");
-  const [staffId, setStaffId] = useState("");
   const [date, setDate] = useState(getTodayIsoDate);
   const [startTime, setStartTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -33,10 +32,7 @@ export function Contact() {
   const selectedService = catalogQuery.data?.services.find((item) => item.id === serviceId);
   const duration = selectedService?.duration_minutes ?? 0;
 
-  const availabilityParams =
-    staffId && date && duration > 0
-      ? { staff_id: staffId, date, duration_minutes: duration }
-      : null;
+  const availabilityParams = date && duration > 0 ? { date, duration_minutes: duration } : null;
 
   const availabilityQuery = useQuery({
     queryKey: ["public", "availability", availabilityParams],
@@ -48,7 +44,7 @@ export function Contact() {
 
   useEffect(() => {
     setStartTime("");
-  }, [staffId, date, serviceId]);
+  }, [date, serviceId]);
 
   const today = useMemo(() => getTodayIsoDate(), []);
 
@@ -59,8 +55,8 @@ export function Contact() {
       toast.error("Enter a valid mobile number (10–15 digits).");
       return;
     }
-    if (!serviceId || !staffId || !date || !startTime) {
-      toast.error("Choose a service, stylist, date, and available time.");
+    if (!serviceId || !date || !startTime) {
+      toast.error("Choose a service, date, and available time.");
       return;
     }
 
@@ -69,7 +65,6 @@ export function Contact() {
       await createPublicBooking({
         name: name.trim(),
         phone: digits,
-        staff_id: staffId,
         service_id: serviceId,
         appointment_date: date,
         start_time: toApiTimeValue(startTime),
@@ -78,7 +73,6 @@ export function Contact() {
       setName("");
       setPhone("");
       setServiceId("");
-      setStaffId("");
       setDate(getTodayIsoDate());
       setStartTime("");
       setNotes("");
@@ -184,30 +178,11 @@ export function Contact() {
                   ))}
                 </select>
               </label>
-              <label className="block sm:col-span-2">
-                <span className="text-[11px] uppercase tracking-luxury text-gold">Stylist</span>
-                <select
-                  name="staff"
-                  required
-                  value={staffId}
-                  onChange={(event) => setStaffId(event.target.value)}
-                  className="mt-2 w-full border-b border-white/20 bg-ink-surface py-3 text-ivory outline-none transition-colors focus:border-gold"
-                >
-                  <option value="">
-                    {catalogQuery.isLoading ? "Loading stylists…" : "Select a stylist"}
-                  </option>
-                  {(catalogQuery.data?.staff ?? []).map((member) => (
-                    <option key={member.id} value={member.id}>
-                      {member.name} · {member.designation}
-                    </option>
-                  ))}
-                </select>
-              </label>
 
               <div className="sm:col-span-2">
                 <p className="text-[11px] uppercase tracking-luxury text-gold">Available time</p>
                 {!availabilityParams ? (
-                  <p className="mt-3 text-sm text-mist">Choose a service, stylist, and date to see open chairs.</p>
+                  <p className="mt-3 text-sm text-mist">Choose a service and date to see open times.</p>
                 ) : availabilityQuery.isLoading ? (
                   <p className="mt-3 text-sm text-mist">Checking the book…</p>
                 ) : availabilityQuery.isError ? (
@@ -215,9 +190,7 @@ export function Contact() {
                     {getErrorMessage(availabilityQuery.error, "Unable to load times for this day.")}
                   </p>
                 ) : slots.length === 0 ? (
-                  <p className="mt-3 text-sm text-mist">
-                    No open slots for this stylist on that date. Try another day or stylist.
-                  </p>
+                  <p className="mt-3 text-sm text-mist">No open times on that date. Please try another day.</p>
                 ) : (
                   <div className="mt-4 grid grid-cols-3 gap-2 sm:grid-cols-4">
                     {slots.map((slot) => {
@@ -251,7 +224,7 @@ export function Contact() {
                   value={notes}
                   onChange={(event) => setNotes(event.target.value)}
                   className="mt-2 w-full resize-none border-b border-white/20 bg-transparent py-3 text-ivory outline-none transition-colors focus:border-gold"
-                  placeholder="Occasion, stylist preference, or house-call request"
+                  placeholder="Occasion or special request"
                 />
               </label>
             </div>

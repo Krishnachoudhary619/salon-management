@@ -8,6 +8,7 @@ import type { Appointment } from "@/types/api";
 interface PaymentFormModalProps {
   open: boolean;
   appointments: Appointment[];
+  defaultAppointmentId?: string;
   loading?: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: PaymentFormValues) => Promise<void>;
@@ -16,6 +17,7 @@ interface PaymentFormModalProps {
 export function PaymentFormModal({
   open,
   appointments,
+  defaultAppointmentId,
   loading,
   onOpenChange,
   onSubmit,
@@ -30,6 +32,7 @@ export function PaymentFormModal({
     >
       <PaymentForm
         appointments={appointments}
+        defaultAppointmentId={defaultAppointmentId}
         loading={loading}
         onCancel={() => onOpenChange(false)}
         onSubmit={async (values) => {

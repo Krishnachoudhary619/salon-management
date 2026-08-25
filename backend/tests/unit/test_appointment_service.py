@@ -231,6 +231,46 @@ async def test_reschedule_edit_list_and_calendar(booking_session: AsyncSession) 
     assert cancelled.cancelled_at is not None
 
 
+async def test_confirm_can_reassign_staff(booking_session: AsyncSession) -> None:
+    staff_id, customer_id, hair_id, _beard_id = await _seed(booking_session)
+    actor = _admin()
+    other = await StaffService(StaffRepository(booking_session)).create_staff(
+        StaffCreateRequest(
+            name="Rohan Mehta",
+            email="rohan@example.com",
+            password="StaffPass123!",
+            phone="9876500002",
+            designation="Master Barber",
+            commission_percentage=Decimal("35.00"),
+            joining_date=date(2024, 2, 1),
+            status=StaffStatus.ACTIVE,
+        ),
+        actor=actor,
+    )
+    await ScheduleService(ScheduleRepository(booking_session)).create_schedule(
+        StaffScheduleCreateRequest(
+            staff_id=other.id,
+            day_of_week=0,
+            start_time=time(9, 0),
+            end_time=time(18, 0),
+        ),
+        actor=actor,
+    )
+    service = _bookings(booking_session)
+    created = await service.create_appointment(
+        _create(staff_id, customer_id, [hair_id]),
+        actor=actor,
+    )
+    confirmed = await service.change_status(
+        created.id,
+        AppointmentStatus.CONFIRMED,
+        actor=actor,
+        staff_id=other.id,
+    )
+    assert confirmed.status == AppointmentStatus.CONFIRMED
+    assert confirmed.staff_id == other.id
+
+
 async def test_staff_can_only_access_own_appointments(booking_session: AsyncSession) -> None:
     staff_id, customer_id, hair_id, _beard_id = await _seed(booking_session)
     service = _bookings(booking_session)

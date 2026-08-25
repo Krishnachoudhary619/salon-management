@@ -10,6 +10,9 @@ import { AppointmentDetailModal } from "@/components/appointments/appointment-de
 import { AppointmentFormModal } from "@/components/appointments/appointment-form-modal";
 import { BookingWizardModal } from "@/components/appointments/booking-wizard-modal";
 import { CancelAppointmentDialog } from "@/components/appointments/cancel-appointment-dialog";
+import { CompleteAppointmentDialog } from "@/components/appointments/complete-appointment-dialog";
+import { ConfirmAppointmentDialog } from "@/components/appointments/confirm-appointment-dialog";
+import { PaymentFormModal } from "@/components/payments/payment-form-modal";
 import { RescheduleModal } from "@/components/appointments/reschedule-modal";
 import { StatusLegend } from "@/components/appointments/status-legend";
 import { ErrorDisplay } from "@/components/feedback/error-display";
@@ -19,13 +22,15 @@ import { useAppointmentCalendar, useAppointmentMutations } from "@/hooks/use-app
 import { useCustomers } from "@/hooks/use-customers";
 import { usePermissions } from "@/hooks/use-permissions";
 import { useServices } from "@/hooks/use-services";
+import { usePaymentMutations } from "@/hooks/use-payments";
 import { useStaff } from "@/hooks/use-staff";
 import { toApiTimeValue, toIsoDate } from "@/lib/appointments/calendar-utils";
-import { canReschedule } from "@/lib/appointments/status-colors";
+import { canReschedule, getVisitActionLabel } from "@/lib/appointments/status-colors";
 import type { BookingDraft } from "@/lib/schemas/booking-wizard";
 import { toAppointmentUpdatePayload, toReschedulePayload } from "@/lib/schemas/appointment";
+import { toPaymentCreatePayload } from "@/lib/schemas/payment";
 import { toast } from "@/lib/toast";
-import type { Appointment } from "@/types/api";
+import type { Appointment, AppointmentStatus } from "@/types/api";
 import type { AppointmentCalendarParams } from "@/types/appointments";
 
 function getInitialRange(): AppointmentCalendarParams {
@@ -72,11 +77,15 @@ export function AppointmentsView() {
     updateAppointment,
     cancelAppointment,
     rescheduleAppointment,
+    changeAppointmentStatus,
     isCreating,
     isUpdating,
     isCancelling,
     isRescheduling,
+    isChangingStatus,
   } = useAppointmentMutations();
+  const { createPayment, isCreating: isRecordingPayment } = usePaymentMutations();
+  const canRecordPayment = canAny(["payments:write"]);
 
   const [bookingOpen, setBookingOpen] = useState(false);
   const [bookingDefaults, setBookingDefaults] = useState<Partial<BookingDraft>>();
@@ -84,6 +93,9 @@ export function AppointmentsView() {
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | undefined>();
 
   const [detailOpen, setDetailOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [completeOpen, setCompleteOpen] = useState(false);
+  const [paymentOpen, setPaymentOpen] = useState(false);
   const [rescheduleOpen, setRescheduleOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
 
@@ -249,9 +261,31 @@ export function AppointmentsView() {
       <AppointmentDetailModal
         open={detailOpen}
         appointment={selectedAppointment}
-        loading={isUpdating || isCancelling || isRescheduling}
+        loading={isUpdating || isCancelling || isRescheduling || isChangingStatus}
         onOpenChange={setDetailOpen}
         onEdit={openEdit}
+        onConfirm={(appointment) => {
+          setSelectedAppointment(appointment);
+          setDetailOpen(false);
+          setConfirmOpen(true);
+        }}
+        onAdvance={async (appointment, status) => {
+          try {
+            const updated = await changeAppointmentStatus({
+              id: appointment.id,
+              payload: { status },
+            });
+            setSelectedAppointment(updated);
+            toast.success(getVisitActionLabel(appointment.status) ?? "Appointment updated");
+          } catch (error) {
+            toast.fromError(error, "Unable to update appointment");
+          }
+        }}
+        onComplete={(appointment) => {
+          setSelectedAppointment(appointment);
+          setDetailOpen(false);
+          setCompleteOpen(true);
+        }}
         onReschedule={(appointment) => {
           setSelectedAppointment(appointment);
           setDetailOpen(false);
@@ -261,6 +295,67 @@ export function AppointmentsView() {
           setSelectedAppointment(appointment);
           setDetailOpen(false);
           setCancelOpen(true);
+        }}
+      />
+
+      <CompleteAppointmentDialog
+        open={completeOpen}
+        appointment={selectedAppointment}
+        loading={isChangingStatus}
+        onOpenChange={setCompleteOpen}
+        onConfirm={async () => {
+          if (!selectedAppointment) {
+            return;
+          }
+          try {
+            const updated = await changeAppointmentStatus({
+              id: selectedAppointment.id,
+              payload: { status: "COMPLETED" },
+            });
+            setSelectedAppointment(updated);
+            toast.success("Visit completed. Invoice created.");
+            if (canRecordPayment) {
+              setPaymentOpen(true);
+            }
+          } catch (error) {
+            toast.fromError(error, "Unable to complete appointment");
+            throw error;
+          }
+        }}
+      />
+
+      <PaymentFormModal
+        open={paymentOpen}
+        appointments={selectedAppointment ? [selectedAppointment] : []}
+        defaultAppointmentId={selectedAppointment?.id}
+        loading={isRecordingPayment}
+        onOpenChange={setPaymentOpen}
+        onSubmit={async (values) => {
+          await createPayment(toPaymentCreatePayload(values));
+          toast.success("Payment recorded");
+        }}
+      />
+
+      <ConfirmAppointmentDialog
+        open={confirmOpen}
+        appointment={selectedAppointment}
+        staff={staff}
+        loading={isChangingStatus}
+        onOpenChange={setConfirmOpen}
+        onConfirm={async (staffId) => {
+          if (!selectedAppointment) {
+            return;
+          }
+          try {
+            await changeAppointmentStatus({
+              id: selectedAppointment.id,
+              payload: { status: "CONFIRMED", staff_id: staffId },
+            });
+            toast.success("Appointment confirmed");
+          } catch (error) {
+            toast.fromError(error, "Unable to confirm appointment");
+            throw error;
+          }
         }}
       />
 

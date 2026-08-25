@@ -62,6 +62,7 @@ class AppointmentStatusRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     status: AppointmentStatus
+    staff_id: UUID | None = None
 
 
 class AppointmentRescheduleRequest(BaseModel):

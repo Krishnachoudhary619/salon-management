@@ -17,6 +17,7 @@ export const apiEndpoints = {
     detail: (id: string) => `/appointments/${id}`,
     cancel: (id: string) => `/appointments/${id}/cancel`,
     reschedule: (id: string) => `/appointments/${id}/reschedule`,
+    status: (id: string) => `/appointments/${id}/status`,
   },
   services: {
     list: "/services",

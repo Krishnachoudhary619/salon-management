@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/config/query-client";
 import {
   cancelAppointment,
+  changeAppointmentStatus,
   createAppointment,
   fetchAppointment,
   fetchCalendarAppointments,
@@ -17,6 +18,7 @@ import type {
   AppointmentCreateRequest,
   AppointmentListParams,
   AppointmentRescheduleRequest,
+  AppointmentStatusRequest,
   AppointmentUpdateRequest,
 } from "@/types/appointments";
 
@@ -49,6 +51,9 @@ export function useAppointmentMutations() {
   const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ["appointments"] });
     queryClient.invalidateQueries({ queryKey: ["customers"] });
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+    queryClient.invalidateQueries({ queryKey: ["invoices"] });
+    queryClient.invalidateQueries({ queryKey: ["payments"] });
   };
 
   const createMutation = useMutation({
@@ -73,14 +78,22 @@ export function useAppointmentMutations() {
     onSuccess: invalidate,
   });
 
+  const changeStatusMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: AppointmentStatusRequest }) =>
+      changeAppointmentStatus(id, payload),
+    onSuccess: invalidate,
+  });
+
   return {
     createAppointment: createMutation.mutateAsync,
     updateAppointment: updateMutation.mutateAsync,
     cancelAppointment: cancelMutation.mutateAsync,
     rescheduleAppointment: rescheduleMutation.mutateAsync,
+    changeAppointmentStatus: changeStatusMutation.mutateAsync,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isCancelling: cancelMutation.isPending,
     isRescheduling: rescheduleMutation.isPending,
+    isChangingStatus: changeStatusMutation.isPending,
   };
 }

@@ -1,6 +1,8 @@
 "use client";
 
+import { PermissionGate } from "@/components/auth/permission-gate";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -11,15 +13,26 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { AppointmentStatusBadge } from "@/components/dashboard/appointment-status-badge";
+import { canComplete, canConfirm, getNextVisitStatus, getVisitActionLabel } from "@/lib/appointments/status-colors";
 import { formatShortDate, formatTime } from "@/lib/format";
-import type { Appointment } from "@/types/api";
+import type { Appointment, AppointmentStatus } from "@/types/api";
 
 interface UpcomingAppointmentsTableProps {
   appointments: Appointment[];
   loading?: boolean;
+  onConfirm?: (appointment: Appointment) => void;
+  onAdvance?: (appointment: Appointment, status: AppointmentStatus) => void;
+  onComplete?: (appointment: Appointment) => void;
 }
 
-export function UpcomingAppointmentsTable({ appointments, loading }: UpcomingAppointmentsTableProps) {
+export function UpcomingAppointmentsTable({
+  appointments,
+  loading,
+  onConfirm,
+  onAdvance,
+  onComplete,
+}: UpcomingAppointmentsTableProps) {
+  const showActions = Boolean(onConfirm || onAdvance || onComplete);
   return (
     <Card>
       <CardHeader>
@@ -43,6 +56,7 @@ export function UpcomingAppointmentsTable({ appointments, loading }: UpcomingApp
                 <TableHead>Staff</TableHead>
                 <TableHead>When</TableHead>
                 <TableHead>Status</TableHead>
+                {showActions ? <TableHead className="text-right">Action</TableHead> : null}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -56,6 +70,35 @@ export function UpcomingAppointmentsTable({ appointments, loading }: UpcomingApp
                   <TableCell>
                     <AppointmentStatusBadge status={appointment.status} />
                   </TableCell>
+                  {showActions ? (
+                    <TableCell className="text-right">
+                      <PermissionGate permissions={["appointments:write", "appointments:write_own"]} any>
+                        {canConfirm(appointment.status) && onConfirm ? (
+                          <Button type="button" size="sm" onClick={() => onConfirm(appointment)}>
+                            Confirm
+                          </Button>
+                        ) : null}
+                        {canComplete(appointment.status) && onComplete ? (
+                          <Button type="button" size="sm" onClick={() => onComplete(appointment)}>
+                            Complete
+                          </Button>
+                        ) : null}
+                        {!canConfirm(appointment.status) &&
+                        !canComplete(appointment.status) &&
+                        onAdvance &&
+                        getNextVisitStatus(appointment.status) ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => onAdvance(appointment, getNextVisitStatus(appointment.status)!)}
+                          >
+                            {getVisitActionLabel(appointment.status)}
+                          </Button>
+                        ) : null}
+                      </PermissionGate>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               ))}
             </TableBody>

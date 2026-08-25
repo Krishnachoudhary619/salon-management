@@ -32,6 +32,34 @@ export function canCancel(status: AppointmentStatus) {
   return CANCELLABLE_STATUSES.includes(status);
 }
 
+export function canConfirm(status: AppointmentStatus) {
+  return status === "PENDING";
+}
+
+const NEXT_VISIT_STATUS: Partial<Record<AppointmentStatus, AppointmentStatus>> = {
+  CONFIRMED: "ARRIVED",
+  ARRIVED: "IN_PROGRESS",
+  IN_PROGRESS: "COMPLETED",
+};
+
+const VISIT_ACTION_LABEL: Partial<Record<AppointmentStatus, string>> = {
+  CONFIRMED: "Mark arrived",
+  ARRIVED: "Start service",
+  IN_PROGRESS: "Complete",
+};
+
+export function getNextVisitStatus(status: AppointmentStatus): AppointmentStatus | null {
+  return NEXT_VISIT_STATUS[status] ?? null;
+}
+
+export function getVisitActionLabel(status: AppointmentStatus): string | null {
+  return VISIT_ACTION_LABEL[status] ?? null;
+}
+
+export function canComplete(status: AppointmentStatus) {
+  return status === "IN_PROGRESS";
+}
+
 export function canEdit(status: AppointmentStatus) {
   return !TERMINAL_STATUSES.includes(status);
 }

@@ -134,7 +134,8 @@ async def update_appointment(
 @router.patch(
     "/{appointment_id}/status",
     summary="Update appointment status",
-    description="Advance or close the booking using the allowed status workflow.",
+    description="Advance or close the booking using the allowed status workflow. "
+    "Confirming may include a staff assignment.",
     response_model=APIResponse[AppointmentResponse],
 )
 async def change_appointment_status(
@@ -143,7 +144,12 @@ async def change_appointment_status(
     bookings: AppointmentServiceDep,
     actor: CurrentUser = Depends(_WRITE),
 ) -> APIResponse[AppointmentResponse]:
-    updated = await bookings.change_status(appointment_id, payload.status, actor=actor)
+    updated = await bookings.change_status(
+        appointment_id,
+        payload.status,
+        actor=actor,
+        staff_id=payload.staff_id,
+    )
     return success_response(updated, message="Appointment status updated")
 
 

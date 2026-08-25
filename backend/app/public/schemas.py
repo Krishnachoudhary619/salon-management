@@ -4,6 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.customers.schemas import _validate_phone
+from app.schedules.schemas import AvailabilitySlot
 
 
 class PublicServiceItem(BaseModel):
@@ -16,15 +17,14 @@ class PublicServiceItem(BaseModel):
     category: str
 
 
-class PublicStaffItem(BaseModel):
-    id: UUID
-    name: str
-    designation: str
-
-
 class PublicCatalogResponse(BaseModel):
     services: list[PublicServiceItem]
-    staff: list[PublicStaffItem]
+
+
+class PublicAvailabilityResponse(BaseModel):
+    date: date
+    duration_minutes: int
+    slots: list[AvailabilitySlot]
 
 
 class PublicBookingRequest(BaseModel):
@@ -32,7 +32,6 @@ class PublicBookingRequest(BaseModel):
 
     name: str = Field(min_length=1, max_length=120)
     phone: str = Field(min_length=10, max_length=15)
-    staff_id: UUID
     service_id: UUID
     appointment_date: date
     start_time: time

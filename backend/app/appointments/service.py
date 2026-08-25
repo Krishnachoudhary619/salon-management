@@ -291,6 +291,7 @@ class AppointmentService(BaseService[Appointment]):
         target: AppointmentStatus,
         *,
         actor: CurrentUser,
+        staff_id: UUID | None = None,
     ) -> AppointmentResponse:
         appointment = await self.get(appointment_id)
         await self._ensure_can_access(appointment, actor, write=True)
@@ -299,12 +300,27 @@ class AppointmentService(BaseService[Appointment]):
             raise ValidationException(
                 f"Cannot change status from {current.value} to {target.value}"
             )
+        if staff_id is not None:
+            if target != AppointmentStatus.CONFIRMED:
+                raise ValidationException("Staff can only be assigned when confirming")
+            assigned = await self._staff_id_for_write(actor, staff_id)
+            if assigned != appointment.staff_id:
+                appointment.staff_id = assigned
+                await self.availability_engine.validate_slot(
+                    staff_id=assigned,
+                    on_date=appointment.appointment_date,
+                    start_time=appointment.start_time,
+                    end_time=appointment.end_time,
+                    exclude_appointment_id=appointment.id,
+                )
         appointment.status = target
         if target == AppointmentStatus.CANCELLED:
             appointment.cancelled_at = datetime.now(UTC)
         if target == AppointmentStatus.COMPLETED:
             appointment.completed_at = datetime.now(UTC)
         await self.appointment_repository.update(appointment, updated_by=actor.id)
+        if staff_id is not None:
+            self.appointment_repository.session.expire(appointment, ["staff"])
         if target == AppointmentStatus.COMPLETED:
             await self.billing_service.generate_invoice_for_appointment(
                 appointment.id,

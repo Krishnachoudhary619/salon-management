@@ -42,6 +42,11 @@ export interface AppointmentRescheduleRequest {
   staff_id?: string;
 }
 
+export interface AppointmentStatusRequest {
+  status: AppointmentStatus;
+  staff_id?: string;
+}
+
 export interface AppointmentListParams {
   page?: number;
   limit?: number;

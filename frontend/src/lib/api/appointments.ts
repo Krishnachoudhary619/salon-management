@@ -9,6 +9,7 @@ import type {
   AppointmentCreateRequest,
   AppointmentListParams,
   AppointmentRescheduleRequest,
+  AppointmentStatusRequest,
   AppointmentUpdateRequest,
 } from "@/types/appointments";
 
@@ -46,6 +47,13 @@ export async function updateAppointment(
 
 export async function cancelAppointment(id: string): Promise<Appointment> {
   return apiRequest(() => apiClient.patch(apiEndpoints.appointments.cancel(id)));
+}
+
+export async function changeAppointmentStatus(
+  id: string,
+  payload: AppointmentStatusRequest,
+): Promise<Appointment> {
+  return apiRequest(() => apiClient.patch(apiEndpoints.appointments.status(id), payload));
 }
 
 export async function rescheduleAppointment(

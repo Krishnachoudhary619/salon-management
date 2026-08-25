@@ -23,12 +23,19 @@ import type { Appointment } from "@/types/api";
 
 interface PaymentFormProps {
   appointments: Appointment[];
+  defaultAppointmentId?: string;
   loading?: boolean;
   onSubmit: (values: PaymentFormValues) => Promise<void>;
   onCancel: () => void;
 }
 
-export function PaymentForm({ appointments, loading = false, onSubmit, onCancel }: PaymentFormProps) {
+export function PaymentForm({
+  appointments,
+  defaultAppointmentId,
+  loading = false,
+  onSubmit,
+  onCancel,
+}: PaymentFormProps) {
   const {
     register,
     handleSubmit,
@@ -39,7 +46,7 @@ export function PaymentForm({ appointments, loading = false, onSubmit, onCancel 
   } = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
-      appointment_id: "",
+      appointment_id: defaultAppointmentId ?? (appointments.length === 1 ? appointments[0].id : ""),
       amount: 0,
       payment_method: "CASH",
     },
@@ -48,6 +55,14 @@ export function PaymentForm({ appointments, loading = false, onSubmit, onCancel 
   const appointmentId = watch("appointment_id");
   const invoiceQuery = useInvoiceByAppointment(appointmentId || undefined);
   const selectedAppointment = appointments.find((item) => item.id === appointmentId);
+
+  useEffect(() => {
+    if (defaultAppointmentId) {
+      setValue("appointment_id", defaultAppointmentId);
+    } else if (appointments.length === 1) {
+      setValue("appointment_id", appointments[0].id);
+    }
+  }, [appointments, defaultAppointmentId, setValue]);
 
   useEffect(() => {
     if (invoiceQuery.data) {
