@@ -271,6 +271,38 @@ async def test_confirm_can_reassign_staff(booking_session: AsyncSession) -> None
     assert confirmed.staff_id == other.id
 
 
+async def test_list_pending_can_search_customer_name_and_phone(
+    booking_session: AsyncSession,
+) -> None:
+    staff_id, customer_id, hair_id, _beard_id = await _seed(booking_session)
+    service = _bookings(booking_session)
+    actor = _admin()
+    created = await service.create_appointment(
+        _create(staff_id, customer_id, [hair_id]),
+        actor=actor,
+    )
+    by_name = await service.list_appointments(
+        PaginationParams(page=1, limit=10, search="Meera"),
+        actor=actor,
+        status=AppointmentStatus.PENDING,
+    )
+    by_phone = await service.list_appointments(
+        PaginationParams(page=1, limit=10, search="9876510001"),
+        actor=actor,
+        status=AppointmentStatus.PENDING,
+    )
+    miss = await service.list_appointments(
+        PaginationParams(page=1, limit=10, search="nobody"),
+        actor=actor,
+        status=AppointmentStatus.PENDING,
+    )
+    assert by_name.total == 1
+    assert by_name.items[0].id == created.id
+    assert by_name.items[0].customer_phone == "9876510001"
+    assert by_phone.total == 1
+    assert miss.total == 0
+
+
 async def test_staff_can_only_access_own_appointments(booking_session: AsyncSession) -> None:
     staff_id, customer_id, hair_id, _beard_id = await _seed(booking_session)
     service = _bookings(booking_session)

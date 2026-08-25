@@ -59,11 +59,13 @@ def to_appointment_response(appointment: Appointment) -> AppointmentResponse:
     lines = sorted(_active_lines(appointment), key=lambda item: item.created_at)
     duration = sum(line.duration_minutes_snapshot for line in lines)
     customer_name = appointment.customer.name if appointment.customer is not None else ""
+    customer_phone = appointment.customer.phone if appointment.customer is not None else ""
     staff_name = appointment.staff.name if appointment.staff is not None else ""
     return AppointmentResponse(
         id=appointment.id,
         customer_id=appointment.customer_id,
         customer_name=customer_name,
+        customer_phone=customer_phone,
         staff_id=appointment.staff_id,
         staff_name=staff_name,
         appointment_date=appointment.appointment_date,
@@ -150,7 +152,7 @@ class AppointmentService(BaseService[Appointment]):
         page = await self.appointment_repository.list(
             params,
             filters=filters or None,
-            search_fields=["notes"],
+            search_fields=["customer_name", "customer_phone"],
             allowed_sort_fields=_ALLOWED_SORT,
         )
         return PaginatedData(

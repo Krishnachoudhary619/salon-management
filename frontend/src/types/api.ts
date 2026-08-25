@@ -80,6 +80,7 @@ export interface Appointment {
   id: string;
   customer_id: string;
   customer_name: string;
+  customer_phone: string;
   staff_id: string;
   staff_name: string;
   appointment_date: string;

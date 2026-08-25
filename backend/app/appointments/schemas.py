@@ -87,6 +87,7 @@ class AppointmentResponse(BaseModel):
     id: UUID
     customer_id: UUID
     customer_name: str
+    customer_phone: str
     staff_id: UUID
     staff_name: str
     appointment_date: date

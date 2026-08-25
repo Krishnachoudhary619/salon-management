@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { CalendarDays, Clock3, Plus } from "lucide-react";
 import type { DateClickInfo, EventDropInfo } from "@fullcalendar/react";
 
 import { PermissionGate } from "@/components/auth/permission-gate";
@@ -13,6 +13,7 @@ import { CancelAppointmentDialog } from "@/components/appointments/cancel-appoin
 import { CompleteAppointmentDialog } from "@/components/appointments/complete-appointment-dialog";
 import { ConfirmAppointmentDialog } from "@/components/appointments/confirm-appointment-dialog";
 import { PaymentFormModal } from "@/components/payments/payment-form-modal";
+import { PendingAppointmentsPanel } from "@/components/appointments/pending-appointments-panel";
 import { RescheduleModal } from "@/components/appointments/reschedule-modal";
 import { StatusLegend } from "@/components/appointments/status-legend";
 import { ErrorDisplay } from "@/components/feedback/error-display";
@@ -30,8 +31,11 @@ import type { BookingDraft } from "@/lib/schemas/booking-wizard";
 import { toAppointmentUpdatePayload, toReschedulePayload } from "@/lib/schemas/appointment";
 import { toPaymentCreatePayload } from "@/lib/schemas/payment";
 import { toast } from "@/lib/toast";
+import { cn } from "@/lib/utils";
 import type { Appointment, AppointmentStatus } from "@/types/api";
 import type { AppointmentCalendarParams } from "@/types/appointments";
+
+type AppointmentsViewMode = "calendar" | "pending";
 
 function getInitialRange(): AppointmentCalendarParams {
   const today = new Date();
@@ -50,6 +54,7 @@ export function AppointmentsView() {
   const canWrite = canAny(["appointments:write", "appointments:write_own"]);
   const canFilterStaff = canAny(["appointments:read"]);
 
+  const [viewMode, setViewMode] = useState<AppointmentsViewMode>("calendar");
   const [calendarParams, setCalendarParams] = useState<AppointmentCalendarParams>(getInitialRange);
   const [staffFilter, setStaffFilter] = useState<string>("");
 
@@ -163,7 +168,7 @@ export function AppointmentsView() {
     }
   };
 
-  if (calendarQuery.isError) {
+  if (viewMode === "calendar" && calendarQuery.isError) {
     return (
       <ErrorDisplay
         error={calendarQuery.error}
@@ -179,17 +184,69 @@ export function AppointmentsView() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Appointments</h1>
           <p className="text-sm text-muted-foreground">
-            Day, week, and month views with status color coding.
+            Calendar for the week, or a searchable queue of pending website bookings.
           </p>
         </div>
-        <PermissionGate permissions={["appointments:write", "appointments:write_own"]} any>
-          <Button type="button" onClick={() => openBooking({ staff_id: staffFilter || undefined })}>
-            <Plus className="h-4 w-4" />
-            Book appointment
-          </Button>
-        </PermissionGate>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="inline-flex rounded-full border border-border bg-card p-1">
+            <button
+              type="button"
+              onClick={() => setViewMode("calendar")}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                viewMode === "calendar" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <CalendarDays className="h-4 w-4" />
+              Calendar
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("pending")}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
+                viewMode === "pending" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              <Clock3 className="h-4 w-4" />
+              Pending
+            </button>
+          </div>
+          <PermissionGate permissions={["appointments:write", "appointments:write_own"]} any>
+            <Button type="button" onClick={() => openBooking({ staff_id: staffFilter || undefined })}>
+              <Plus className="h-4 w-4" />
+              Book appointment
+            </Button>
+          </PermissionGate>
+        </div>
       </div>
 
+      {viewMode === "pending" ? (
+        <div className="space-y-4">
+          {canFilterStaff ? (
+            <select
+              value={staffFilter}
+              onChange={(event) => setStaffFilter(event.target.value)}
+              className="h-10 rounded-md border border-input bg-background px-3 text-sm lg:min-w-56"
+            >
+              <option value="">All staff</option>
+              {staff.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          <PendingAppointmentsPanel
+            staffId={staffFilter || undefined}
+            onSelect={openDetail}
+            onConfirm={(appointment) => {
+              setSelectedAppointment(appointment);
+              setConfirmOpen(true);
+            }}
+          />
+        </div>
+      ) : (
       <Card>
         <CardHeader className="space-y-4">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -223,6 +280,7 @@ export function AppointmentsView() {
           />
         </CardContent>
       </Card>
+      )}
 
       <BookingWizardModal
         open={bookingOpen}

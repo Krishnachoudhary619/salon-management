@@ -58,6 +58,7 @@ export interface AppointmentListParams {
   appointment_date?: string;
   date_from?: string;
   date_to?: string;
+  search?: string;
 }
 
 export interface CalendarEventInput {

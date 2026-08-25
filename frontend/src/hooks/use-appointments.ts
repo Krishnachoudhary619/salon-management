@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/config/query-client";
 import {
@@ -42,6 +42,7 @@ export function useAppointments(params: AppointmentListParams) {
   return useQuery({
     queryKey: queryKeys.appointments.list(params),
     queryFn: () => fetchAppointments(params),
+    placeholderData: keepPreviousData,
   });
 }
 

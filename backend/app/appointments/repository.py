@@ -1,12 +1,14 @@
+from collections.abc import Sequence
 from datetime import UTC, date, datetime
 from uuid import UUID
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload, selectinload
 
 from app.appointments.models import Appointment
 from app.appointments.models import AppointmentService as AppointmentLine
+from app.common.pagination import PaginationParams
 from app.common.repository import BaseRepository
 from app.customers.models import Customer
 from app.services.models import Service
@@ -44,6 +46,31 @@ class AppointmentRepository(BaseRepository[Appointment]):
             )
             .execution_options(populate_existing=True)
         )
+
+    def _apply_search(
+        self,
+        stmt: Select[tuple[Appointment]],
+        params: PaginationParams,
+        search_fields: Sequence[str] | None,
+    ) -> Select[tuple[Appointment]]:
+        del search_fields
+        if not params.search:
+            return stmt
+        escaped = params.search.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+        pattern = f"%{escaped}%"
+        customer_match = (
+            select(Customer.id)
+            .where(
+                Customer.id == Appointment.customer_id,
+                Customer.is_deleted.is_(False),
+                or_(
+                    Customer.name.ilike(pattern, escape="\\"),
+                    Customer.phone.ilike(pattern, escape="\\"),
+                ),
+            )
+            .exists()
+        )
+        return stmt.where(customer_match)
 
     async def list_in_range(
         self,
