@@ -58,16 +58,21 @@ export const apiEndpoints = {
     list: "/tasks",
     detail: (id: string) => `/tasks/${id}`,
   },
+  public: {
+    catalog: "/public/catalog",
+    availability: "/public/availability",
+    bookings: "/public/bookings",
+  },
 } as const;
 
-export const publicRoutes = ["/login"] as const;
+export const publicRoutes = ["/", "/login"] as const;
 
 export { appRoutes, adminNavItems } from "@/config/navigation";
 
-export const defaultAuthenticatedRoute = "/";
+export const defaultAuthenticatedRoute = "/dashboard";
 
 export const roleHomeRoutes = {
-  ADMIN: "/",
+  ADMIN: "/dashboard",
   RECEPTIONIST: "/appointments",
   STAFF: "/appointments",
 } as const;

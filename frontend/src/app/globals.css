@@ -64,3 +64,13 @@
 .appointment-calendar .fc-event {
   cursor: pointer;
 }
+
+.landing {
+  background-color: #0f0f0f;
+  color: #ffffff;
+}
+
+.landing ::selection {
+  background: rgba(212, 175, 55, 0.28);
+  color: #ffffff;
+}

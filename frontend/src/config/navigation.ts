@@ -16,7 +16,7 @@ import {
 import type { Permission } from "@/types/api";
 
 export const appRoutes = {
-  dashboard: "/",
+  dashboard: "/dashboard",
   appointments: "/appointments",
   customers: "/customers",
   services: "/services",

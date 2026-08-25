@@ -26,6 +26,7 @@ from app.customers.router import router as customers_router
 from app.dashboard.router import router as dashboard_router
 from app.database.session import engine, wait_for_database
 from app.performance.router import router as performance_router
+from app.public.router import router as public_router
 from app.schedules.router import availability_router
 from app.schedules.router import router as schedules_router
 from app.services.router import router as services_router
@@ -103,6 +104,7 @@ def create_app() -> FastAPI:
     application.include_router(tasks_router, prefix=settings.API_V1_PREFIX)
     application.include_router(dashboard_router, prefix=settings.API_V1_PREFIX)
     application.include_router(performance_router, prefix=settings.API_V1_PREFIX)
+    application.include_router(public_router, prefix=settings.API_V1_PREFIX)
     return application
 
 

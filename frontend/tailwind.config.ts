@@ -39,11 +39,28 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        ink: {
+          DEFAULT: "#0F0F0F",
+          surface: "#161616",
+        },
+        gold: {
+          DEFAULT: "#D4AF37",
+          light: "#E6C567",
+        },
+        ivory: "#FFFFFF",
+        mist: "#D6D6D6",
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-playfair)", "Georgia", "serif"],
+      },
+      letterSpacing: {
+        luxury: "0.28em",
       },
     },
   },
