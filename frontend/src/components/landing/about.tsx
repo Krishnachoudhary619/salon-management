@@ -12,8 +12,8 @@ export function About() {
         <Reveal>
           <div className="relative aspect-[4/5] overflow-hidden">
             <Image
-              src="https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1400&q=80"
-              alt="The Golden Premium atelier interior"
+              src="/brand/house-story-image.jpeg"
+              alt="Golden Premium Salon house story"
               fill
               className="object-cover"
             />
@@ -26,7 +26,7 @@ export function About() {
             align="left"
             eyebrow="The house story"
             title="A quieter kind of luxury"
-            description="Founded for gentlemen and women who already have everything — except time, and a chair they can trust."
+            description="Founded for gentlemen who already have everything — except time, and a chair they can trust."
           />
           <div className="mt-8 space-y-5 text-base leading-relaxed text-mist">
             <p>
@@ -34,20 +34,11 @@ export function About() {
               appointments, and a staff who speak only when asked.
             </p>
             <p>
-              The rooms are lined in dark stone and brass. The products are blended for Dubai heat. The guest book is
+              The rooms are lined in dark stone and brass. The products are blended for Saudi Arabia. The guest book is
               not published. That is the entire point.
             </p>
           </div>
-          <dl className="mt-10 grid grid-cols-2 gap-8 border-t border-white/10 pt-8">
-            <div>
-              <dt className="text-[11px] uppercase tracking-luxury text-gold">Established</dt>
-              <dd className="mt-2 font-serif text-3xl text-ivory">2018</dd>
-            </div>
-            <div>
-              <dt className="text-[11px] uppercase tracking-luxury text-gold">Private suites</dt>
-              <dd className="mt-2 font-serif text-3xl text-ivory">Six</dd>
-            </div>
-          </dl>
+
         </Reveal>
       </div>
     </section>
