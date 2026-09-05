@@ -25,14 +25,26 @@ export function Hero() {
           className="max-w-3xl"
         >
           <div className="mb-8 flex items-center gap-4">
-            <Image
-              src={brand.logo}
-              alt=""
-              width={88}
-              height={88}
-              className="h-20 w-20 object-contain sm:h-24 sm:w-24"
-              priority
-            />
+            <div className="relative flex h-[5.5rem] w-[5.5rem] shrink-0 items-center justify-center sm:h-[6.5rem] sm:w-[6.5rem]">
+              <div
+                aria-hidden
+                className="absolute inset-[-18%] rounded-full bg-[radial-gradient(circle,rgba(212,175,55,0.42)_0%,rgba(212,175,55,0.14)_42%,transparent_72%)] blur-md"
+              />
+              <div
+                aria-hidden
+                className="absolute inset-0 rounded-full bg-gradient-to-br from-gold/35 via-gold/10 to-transparent opacity-90"
+              />
+              <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full border border-gold/35 bg-gradient-to-br from-gold/25 via-ink/50 to-ink/80 p-2.5 shadow-[0_0_32px_rgba(212,175,55,0.22)] sm:p-3">
+                <Image
+                  src={brand.logo}
+                  alt=""
+                  width={88}
+                  height={88}
+                  className="h-full w-full rounded-full object-cover"
+                  priority
+                />
+              </div>
+            </div>
             <p className="text-[11px] uppercase tracking-luxury text-gold">{brand.city} · Saudi Arabia</p>
           </div>
           <h1 className="font-serif text-5xl leading-[1.05] text-ivory sm:text-6xl lg:text-7xl">
