@@ -42,32 +42,24 @@ export const reasons = [
 
 export const team = [
   {
-    name: "Priya Sharma",
+    name: "Sabit",
     role: "Creative Director",
-    image:
-      "https://images.unsplash.com/photo-1580618672591-eb180b1a973f?auto=format&fit=crop&w=900&q=80",
-    bio: "Fifteen years across Mayfair and DIFC. Known for architectural cuts that photograph as well as they wear.",
+    image: "/brand/director-image.jpg",
+    bio: "Known for delivering refined grooming experiences with meticulous attention to detail and personal style.",
   },
   {
-    name: "Rohan Mehta",
+    name: "Yahiya",
     role: "Master Barber",
     image:
       "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=80",
-    bio: "Hot-towel traditionalist with a modern edge. Trusted by financiers who refuse a hurried chair.",
+    bio: "Combining traditional barbering craftsmanship with modern techniques for a distinguished finish.",
   },
   {
-    name: "Ananya Iyer",
-    role: "Colour Atelier",
-    image:
-      "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=900&q=80",
-    bio: "Quiet colour — lived-in brunettes, silver blending, and sun-softened highlights for Dubai light.",
-  },
-  {
-    name: "Khalid Rahman",
+    name: "Fahad",
     role: "Executive Stylist",
     image:
       "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=900&q=80",
-    bio: "The house specialist for private clients, hotel residences, and last-minute gala preparation.",
+    bio: "Creating sophisticated, contemporary looks tailored to each client's lifestyle and preferences.",
   },
 ] as const;
 

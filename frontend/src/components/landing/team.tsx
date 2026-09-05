@@ -17,7 +17,7 @@ export function Team() {
           />
         </Reveal>
 
-        <div className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {team.map((member, index) => (
             <Reveal key={member.name} delay={index * 0.08}>
               <article>
