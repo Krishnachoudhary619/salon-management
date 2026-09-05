@@ -41,3 +41,13 @@ def test_generate_slots_steps_and_skips_busy() -> None:
 def test_slot_must_fit_duration() -> None:
     slots = generate_slots([(time(10, 0), time(11, 0))], busy=[], duration_minutes=90)
     assert slots == []
+
+
+def test_generate_slots_respects_noon_to_midnight_shop_hours() -> None:
+    windows = [(time(12, 0), time(23, 59))]
+    slots = generate_slots(windows, busy=[], duration_minutes=30, step_minutes=15)
+    starts = [start.strftime("%H:%M") for start, _end in slots]
+    assert starts[0] == "12:00"
+    assert starts[-1] == "23:30"
+    assert "11:45" not in starts
+    assert all(start >= time(12, 0) for start, _end in slots)

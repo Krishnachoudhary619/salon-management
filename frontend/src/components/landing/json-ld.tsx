@@ -16,7 +16,7 @@ export function LandingJsonLd() {
       postalCode: "34622",
       addressCountry: "SA",
     },
-    openingHours: "Mo-Su 11:30-00:00",
+    openingHours: "Mo-Su 12:00-00:00",
     priceRange: "$$",
     description: brand.tagline,
     hasOfferCatalog: {

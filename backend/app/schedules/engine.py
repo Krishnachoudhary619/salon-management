@@ -1,6 +1,20 @@
 from datetime import date, datetime, time, timedelta
 
 DEFAULT_SLOT_STEP_MINUTES = 15
+END_OF_DAY_CLOSE = time(23, 59)
+
+
+def _closes_at_midnight(window_end: time) -> bool:
+    return window_end >= END_OF_DAY_CLOSE
+
+
+def _window_close(day: date, window_start: time, window_end: time) -> datetime:
+    """Map a schedule window to an exclusive close instant on the booking day."""
+    if window_end <= window_start:
+        return datetime.combine(day + timedelta(days=1), window_end)
+    if _closes_at_midnight(window_end):
+        return datetime.combine(day + timedelta(days=1), time(0, 0))
+    return datetime.combine(day, window_end)
 
 
 def intervals_overlap(start_a: time, end_a: time, start_b: time, end_b: time) -> bool:
@@ -10,7 +24,11 @@ def intervals_overlap(start_a: time, end_a: time, start_b: time, end_b: time) ->
 
 def window_covers(window_start: time, window_end: time, start: time, end: time) -> bool:
     """True when [start, end) sits fully inside [window_start, window_end)."""
-    return window_start <= start and end <= window_end
+    if start < window_start:
+        return False
+    if _closes_at_midnight(window_end):
+        return end == time(0, 0) or end <= window_end
+    return end <= window_end
 
 
 def weekday_index(value: date) -> int:
@@ -34,7 +52,7 @@ def generate_slots(
     slots: list[tuple[time, time]] = []
     for window_start, window_end in sorted(windows, key=lambda window: window[0]):
         cursor = datetime.combine(day, window_start)
-        window_close = datetime.combine(day, window_end)
+        window_close = _window_close(day, window_start, window_end)
         while cursor + duration <= window_close:
             slot_end = cursor + duration
             start_t = cursor.time()

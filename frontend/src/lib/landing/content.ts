@@ -8,7 +8,7 @@ export const brand = {
   whatsappHref: "https://wa.me/966547085374",
   email: "goldensaloonkhobar@gmail.com",
   address: "Near GRAND RESTAURANT, 22nd Street, Al Khobar Al Janubiyah 34622",
-  hours: "Daily, 11:30 AM — 12:00 AM",
+  hours: "Daily, 12:00 PM — 12:00 AM",
   logo: "/brand/golden-premium-salon-logo.jpg",
 } as const;
 

@@ -170,14 +170,15 @@ SAMPLE_STAFF: tuple[SampleStaffSpec, ...] = (
 )
 
 # day_of_week: 0 = Monday … 6 = Sunday (matches availability engine)
+# 12:00–23:59 represents shop hours 12:00 PM through midnight (12:00 AM).
 DEFAULT_WORKING_DAYS: tuple[tuple[int, time, time], ...] = (
-    (0, time(9, 0), time(18, 0)),
-    (1, time(9, 0), time(18, 0)),
-    (2, time(9, 0), time(18, 0)),
-    (3, time(9, 0), time(18, 0)),
-    (4, time(9, 0), time(18, 0)),
-    (5, time(9, 0), time(18, 0)),
-    (6, time(10, 0), time(16, 0)),
+    (0, time(12, 0), time(23, 59)),
+    (1, time(12, 0), time(23, 59)),
+    (2, time(12, 0), time(23, 59)),
+    (3, time(12, 0), time(23, 59)),
+    (4, time(12, 0), time(23, 59)),
+    (5, time(12, 0), time(23, 59)),
+    (6, time(12, 0), time(23, 59)),
 )
 
 
@@ -345,6 +346,7 @@ async def seed_sample_staff(
 async def seed_sample_schedules(session: AsyncSession, staff_members: list[Staff]) -> None:
     """Ensure default weekly working hours exist for sample staff."""
     created = 0
+    updated = 0
     for staff in staff_members:
         for day_of_week, start_time, end_time in DEFAULT_WORKING_DAYS:
             result = await session.execute(
@@ -354,7 +356,12 @@ async def seed_sample_schedules(session: AsyncSession, staff_members: list[Staff
                     StaffSchedule.is_deleted.is_(False),
                 )
             )
-            if result.scalar_one_or_none() is not None:
+            existing = result.scalar_one_or_none()
+            if existing is not None:
+                if existing.start_time != start_time or existing.end_time != end_time:
+                    existing.start_time = start_time
+                    existing.end_time = end_time
+                    updated += 1
                 continue
             session.add(
                 StaffSchedule(
@@ -366,7 +373,7 @@ async def seed_sample_schedules(session: AsyncSession, staff_members: list[Staff
             )
             created += 1
             await session.flush()
-    logger.info("seeded_sample_schedules", created=created)
+    logger.info("seeded_sample_schedules", created=created, updated=updated)
 
 
 def _reject_default_passwords_in_production(settings: Settings) -> None:
