@@ -33,7 +33,7 @@ export function Hero() {
               className="h-20 w-20 object-contain sm:h-24 sm:w-24"
               priority
             />
-            <p className="text-[11px] uppercase tracking-luxury text-gold">DIFC · Dubai</p>
+            <p className="text-[11px] uppercase tracking-luxury text-gold">{brand.city} · Saudi Arabia</p>
           </div>
           <h1 className="font-serif text-5xl leading-[1.05] text-ivory sm:text-6xl lg:text-7xl">
             Grooming, composed

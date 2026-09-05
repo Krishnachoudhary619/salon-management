@@ -11,11 +11,12 @@ export function LandingJsonLd() {
     url: "/",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "Level 12, Gate Avenue, DIFC",
-      addressLocality: "Dubai",
-      addressCountry: "AE",
+      streetAddress: "Near GRAND RESTAURANT, 22nd Street, Al Khobar Al Janubiyah",
+      addressLocality: "Al Khobar",
+      postalCode: "34622",
+      addressCountry: "SA",
     },
-    openingHours: "Mo-Su 10:00-22:00",
+    openingHours: "Mo-Su 11:30-00:00",
     priceRange: "$$",
     description: brand.tagline,
     hasOfferCatalog: {

@@ -26,13 +26,11 @@ export function LandingFooter() {
         <div className="text-sm text-mist">
           <p>{brand.address}</p>
           <p className="mt-2">{brand.hours}</p>
-          <Link href="/login" className="mt-6 inline-block text-[11px] uppercase tracking-luxury text-white/40 hover:text-gold">
-            House staff
-          </Link>
+
         </div>
       </div>
       <p className="mx-auto mt-16 max-w-7xl border-t border-white/10 pt-8 text-[11px] uppercase tracking-luxury text-white/35">
-        © {new Date().getFullYear()} {brand.name}. Dubai.
+        © {new Date().getFullYear()} {brand.name}. {brand.city}.
       </p>
     </footer>
   );
