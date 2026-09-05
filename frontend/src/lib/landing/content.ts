@@ -85,20 +85,17 @@ export const gallery = [
 export const testimonials = [
   {
     quote:
-      "The only chair in Dubai I trust before a board presentation. Silence, precision, and they never run late.",
-    name: "James Al-Hariri",
-    title: "Managing Partner, DIFC",
+      "A luxurious saloon with cheaper price range and wide range of options. Very professional service.",
+    name: "Althaf VA",
   },
   {
     quote:
-      "It feels closer to a private members’ club than a salon. The Black Reserve is how I prepare for gala season.",
-    name: "Elena Voskresenskaya",
-    title: "Palm Jumeirah",
+      "New saloon in Al Khobar! The staff is friendly, the space is clean, and the service was excellent. I'm really happy with my experience and will definitely be coming back for sure.",
+    name: "Badusha P.H",
   },
   {
     quote:
-      "Discreet, exacting, and entirely uninterested in trends. That is why I keep a standing Friday appointment.",
-    name: "Omar bin Rashid",
-    title: "Family Office, Emirates Hills",
+      "Amazing experience! The service was quick, professional, and top quality. The team was very welcoming, and the salon atmosphere was great. Definitely one of the best salons I've visited!",
+    name: "Abdulla P A",
   },
 ] as const;

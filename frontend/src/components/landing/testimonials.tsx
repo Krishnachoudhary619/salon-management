@@ -23,7 +23,6 @@ export function Testimonials() {
                 <footer className="mt-8 border-t border-white/10 pt-6">
                   <cite className="not-italic">
                     <span className="block text-sm text-ivory">{item.name}</span>
-                    <span className="mt-1 block text-[11px] uppercase tracking-luxury text-gold">{item.title}</span>
                   </cite>
                 </footer>
               </blockquote>
