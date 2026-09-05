@@ -104,8 +104,8 @@ export const services = [
 
 export const reasons = [
   {
-    title: "Private suites",
-    copy: "No open floor. Each guest is received in a dedicated room with linen, espresso, and complete discretion.",
+    title: "Personalized Grooming",
+    copy: "Every appointment is tailored to your style, routine, and preferences, ensuring a consistent experience with every visit.",
   },
   {
     title: "Master craftsmen",

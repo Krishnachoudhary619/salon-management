@@ -9,8 +9,8 @@ export function Hero() {
   return (
     <section className="relative isolate min-h-[100svh] overflow-hidden">
       <Image
-        src="https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=2400&q=80"
-        alt="Private grooming suite at Golden Premium Salon"
+        src="/brand/golden-salon-home-hero.png"
+        alt="Golden Saloon storefront at night"
         fill
         priority
         className="object-cover"
