@@ -65,28 +65,20 @@ export const team = [
 
 export const gallery = [
   {
-    src: "https://images.unsplash.com/photo-1585747860715-2ba37e788b70?auto=format&fit=crop&w=1400&q=80",
-    alt: "Dark marble grooming suite with gold fixtures",
+    src: "/brand/workshop-image.png",
+    alt: "Golden Premium Salon workshop interior",
   },
   {
-    src: "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1400&q=80",
-    alt: "Master barber at work in a private chair",
+    src: "/brand/house-story-image.jpeg",
+    alt: "Golden Premium Salon house details",
   },
   {
-    src: "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1400&q=80",
-    alt: "Luxury salon interior with leather seating",
+    src: "/brand/workshop-image-2.png",
+    alt: "Golden Premium Salon grooming station",
   },
   {
-    src: "https://images.unsplash.com/photo-1599351431202-1e0f0137899a?auto=format&fit=crop&w=1400&q=80",
-    alt: "Precision beard grooming",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1562322140-8baeececf3df?auto=format&fit=crop&w=1400&q=80",
-    alt: "Colour atelier finishing",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1516975080664-ed2fc6a32937?auto=format&fit=crop&w=1400&q=80",
-    alt: "Evening grooming ritual",
+    src: "/brand/workshop-image-3.png",
+    alt: "Golden Premium Salon barber at work",
   },
 ] as const;
 
