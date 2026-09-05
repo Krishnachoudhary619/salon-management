@@ -173,7 +173,7 @@ export function Contact() {
                   </option>
                   {(catalogQuery.data?.services ?? []).map((service) => (
                     <option key={service.id} value={service.id}>
-                      {service.name} · {service.duration_minutes} min · {formatCurrency(service.price)}
+                      {service.name} · {formatCurrency(service.price)}
                     </option>
                   ))}
                 </select>

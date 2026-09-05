@@ -1,4 +1,4 @@
-import { brand, services } from "@/lib/landing/content";
+import { brand } from "@/lib/landing/content";
 
 export function LandingJsonLd() {
   const data = {
@@ -16,19 +16,11 @@ export function LandingJsonLd() {
       addressCountry: "AE",
     },
     openingHours: "Mo-Su 10:00-22:00",
-    priceRange: "SAR 25–SAR 200",
+    priceRange: "$$",
     description: brand.tagline,
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Grooming rituals",
-      itemListElement: services.map((service) => ({
-        "@type": "Offer",
-        itemOffered: {
-          "@type": "Service",
-          name: service.name,
-          description: service.description,
-        },
-      })),
     },
   };
 
