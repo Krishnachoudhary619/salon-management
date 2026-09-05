@@ -9,7 +9,7 @@ export function LandingFooter() {
       <div className="mx-auto flex max-w-7xl flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-sm">
           <div className="flex items-center gap-3">
-            <Image src={brand.logo} alt="" width={56} height={56} className="h-14 w-14 object-contain" />
+            <Image src={brand.logo} alt="" width={56} height={56} className="h-14 w-14 rounded-full object-cover" />
             <p className="font-serif text-xl text-ivory">{brand.name}</p>
           </div>
           <p className="mt-5 text-sm leading-relaxed text-mist">{brand.tagline}</p>

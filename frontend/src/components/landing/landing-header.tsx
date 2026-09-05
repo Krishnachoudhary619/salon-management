@@ -42,7 +42,7 @@ export function LandingHeader() {
             alt={`${brand.name} emblem`}
             width={48}
             height={48}
-            className="h-12 w-12 object-contain"
+            className="h-12 w-12 rounded-full object-cover"
             priority
           />
           <span className="hidden font-serif text-lg tracking-wide text-ivory sm:block">{brand.shortName}</span>
