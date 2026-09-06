@@ -42,7 +42,7 @@ export const reasons = [
 
 export const team = [
   {
-    name: "Sabit",
+    name: "AL Sabit",
     role: "Creative Director",
     image: "/brand/director-image.jpg",
     bio: "Known for delivering refined grooming experiences with meticulous attention to detail and personal style.",
